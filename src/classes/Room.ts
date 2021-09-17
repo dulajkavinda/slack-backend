@@ -2,14 +2,14 @@ class Room {
   private roomId;
   private roomTitle;
   private namespace;
-  private provateRoom;
+  private privateRoom;
   private history;
 
   constructor(roomId, roomTitle, namespace, privateRoom = false) {
     this.roomId = roomId;
     this.roomTitle = roomTitle;
     this.namespace = namespace;
-    this.provateRoom = privateRoom;
+    this.privateRoom = privateRoom;
     this.history = [];
   }
 

@@ -6,27 +6,34 @@ const socketio = require("socket.io");
 
 const expressServer = app.listen(8000);
 
-import namespaces from "./data/namespaces";
-
-console.log(namespaces);
-
 const io = socketio(expressServer, {
   cors: {
     origin: "*",
   },
 });
 
-io.on("connection", (socket: Socket) => {
-  socket.on("messageToServer", (msg: String) => {
-    socket.emit("messageFromServer", msg);
-  });
+import namespaces from "./data/namespaces";
 
-  socket.join("level1");
-  io.of("/")
-    .to("level1")
-    .emit("joined", `${socket.id} says i have joined the level1 room`);
+io.on("connection", (socket: Socket) => {
+  let nsData = namespaces.map((namespace) => {
+    return {
+      img: namespace.img,
+      endpoint: namespace.endpoint,
+    };
+  });
+  socket.emit("nsList", nsData);
 });
 
-io.of("/admin").on("connection", (socket: Socket) => {
-  io.of("/admin").emit("welcome", "welcome to the admin channel");
+namespaces.forEach((namespace) => {
+  io.of(namespace.endpoint).on("connection", (nsSocket: Socket) => {
+    console.log(`${nsSocket.id} has joined ${namespace.endpoint}`);
+
+    if (namespace.endpoint === "/wiki") {
+      nsSocket.emit("nsRoomLoad", namespaces[0].rooms);
+    } else if (namespace.endpoint === "/mozilla") {
+      nsSocket.emit("nsRoomLoad", namespaces[1].rooms);
+    } else {
+      nsSocket.emit("nsRoomLoad", namespaces[2].rooms);
+    }
+  });
 });
